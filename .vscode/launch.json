@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Attach to Python Remote (Server)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",  // 如果是远程服务器，填服务器IP
+                "port": 5678
+            },
+            "justMyCode": false
+        },
+        {
+            "name": "Attach to Python Remote (Client)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",  // 如果是远程服务器，填服务器IP
+                "port": 5679
+            },
+            "justMyCode": false
+        }
+    ]
+}
