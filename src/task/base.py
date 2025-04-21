@@ -24,7 +24,7 @@ class BaseTask:
         self.scenary.load_stage()
 
         # 2. 创建机器人
-        self.robot.spawn()
+        self.robot.spawn(self.scenary.world)
 
         # 3. 创建传感器
         self.sensors.spawn()
@@ -52,6 +52,19 @@ class BaseTask:
                 if self.reset_needed:
                     self.reset()
                     self.reset_needed = False
+
+
+                # 获取传感器数据
+                rgb_data = self.sensors.get_data()
+                joint_pos = self.robot.get_joint_position()
+                data = {'rgb_img':rgb_data,'joint_pos':joint_pos}
+
+                # 获取动作
+                action = self.controller.forward(data)
+
+                # 控制机器人
+                self.robot.apply_action(action)
+
                 i = i +1 
 
         simulation_app.close()

@@ -4,6 +4,9 @@ class BaseSensor:
     def __init__(self):
         pass
 
+    def get_data(self):
+        pass
+
 
 class Camera(BaseSensor):
     def __init__(self,
@@ -15,15 +18,26 @@ class Camera(BaseSensor):
         self.camera_prim_path = camera_prim_path
         self.camera_freq = camera_freq
         self.resolution = resolution
+        self.camera = None
     
     def reset(self):
         pass
 
 
     def spawn(self):
-        camera = IsaacCamera(
+        self.camera = IsaacCamera(
             prim_path=self.camera_prim_path,  # 使用 USD 中的路径，不重新定义
             frequency = self.camera_freq,
-            resolution = self.resolution,
+            resolution = (self.resolution[0],self.resolution[1]),
         )
-        return camera
+        self.camera.initialize()
+
+    def get_data(self):
+        for i in range(8):  # 最多 get 8 次，还没 get 到 camera 数据则退出
+            rgb_data = self.camera.get_rgb()  # 获取 RGB 数据
+            if len(rgb_data) == 0:
+                continue
+            return rgb_data
+
+
+    

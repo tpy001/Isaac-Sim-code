@@ -2,7 +2,8 @@ from omni.isaac.core import World
 from omni.isaac.core.utils.stage import add_reference_to_stage
 import os
 import omni.usd
-
+from omni.isaac.core.objects import DynamicCuboid
+from src.utils import to_numpy_recursive
 
 class BaseScenary:
     def __init__(self, usd_file_path):
@@ -26,3 +27,19 @@ class BaseScenary:
 
     def reset(self):
         self.world.reset()
+
+class StackCubeScenary(BaseScenary):
+    def __init__(self,src_cube_cfg,target_cube_cfg,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.source_cube = self.add_cube(src_cube_cfg)
+        self.target_cube = self.add_cube(target_cube_cfg)
+
+    def add_cube(self,cube_cfg):
+        self.load_stage()
+        cube = self.world.scene.add(
+            DynamicCuboid(
+                **to_numpy_recursive(cube_cfg)
+            )
+        )
+        
+        return cube
