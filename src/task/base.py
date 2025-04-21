@@ -35,11 +35,32 @@ class BaseTask:
         # 5. 重置环境
         self.reset()
 
+    def get_raw_data(self):
+        rgb_data = self.sensors.get_data()
+
+        ee_pose = self.robot.get_ee_pose()
+        joint_pos = self.robot.get_joint_position()
+
+        init_ee_pose = self.robot.get_init_ee_pose()
+        init_joint_pos = self.robot.get_init_joint_pos()
+
+        gripper_width = self.robot.get_gripper_width()
+
+        data = {
+            'rgb_data': rgb_data,
+            'ee_pose': ee_pose,
+            'joint_pos': joint_pos,
+            'init_ee_pose': init_ee_pose,
+            'init_joint_pos': init_joint_pos,
+            'gripper_width': gripper_width
+        }
+        return data
 
     def run(self,simulation_app):
         world = self.scenary.world
         warm_up = 100
         i = 0
+        interval = 60 // self.sensors.camera_freq
         while simulation_app.is_running():
             # 推进仿真并渲染
             self.scenary.step(render=True)
@@ -49,21 +70,21 @@ class BaseTask:
                 i += 1
                 continue
             if world.is_playing():
+                reset = self.reset_needed
                 if self.reset_needed:
                     self.reset()
                     self.reset_needed = False
 
+                if i % interval == 0:
+                    # 获取传感器数据
+                    data = self.get_raw_data()
+                    data['reset'] = reset
 
-                # 获取传感器数据
-                rgb_data = self.sensors.get_data()
-                joint_pos = self.robot.get_joint_position()
-                data = {'rgb_img':rgb_data,'joint_pos':joint_pos}
+                    # 获取动作
+                    action = self.controller.forward(data)
 
-                # 获取动作
-                action = self.controller.forward(data)
-
-                # 控制机器人
-                self.robot.apply_action(action)
+                    # 控制机器人
+                    self.robot.apply_action(action)
 
                 i = i +1 
 
