@@ -1,0 +1,22 @@
+# config.yaml
+scenary:
+  _target_: src.scenary.base.BaseScenary
+  usd_file_path: "/home/tay/Desktop/Robot/Asset/FastUMI/data_collect.usd"
+
+controller:
+  _target_: src.controller.base.BaseController
+  
+sensor:
+  _target_: src.sensor.base.Camera
+  camera_prim_path: /World/franka/panda_hand/owl/camera
+  camera_freq: 10 
+  resolution: [1280,720]
+
+robot:
+  _target_: src.robots.base.BaseRobot
+  robot_prim_path: "/World/franka"
+
+task:
+  _target_: src.task.base.BaseTask
+
+sensor_list: []    # 可以加入更多 sensor 配置  
