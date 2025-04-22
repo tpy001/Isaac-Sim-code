@@ -33,7 +33,7 @@ printenv >${workspaceFolder}/.vscode/.standalone_examples.env
 
 echo "$PYTHON_EXECUTABLE"
 
-source ~/catkin_ws/devel/setup.bash
+source ./catkin_ws/devel/setup.bash
 # 5. 运行 Python 脚本
 
 DEFAULT_SCRIPT="Hello_World.py"  # 默认脚本
