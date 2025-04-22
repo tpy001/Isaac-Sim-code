@@ -6,7 +6,7 @@ from omegaconf import DictConfig
 from omni.isaac.kit import SimulationApp
 simulation_app = SimulationApp({"headless": False})
 
-@hydra.main(config_path="./configs", config_name="stack_cube_act",version_base="1.3.2")
+@hydra.main(config_path="./configs", config_name="grasp_corn",version_base="1.3.2")
 def main(cfg: DictConfig):
     # 根据配置创建场景
     scenary_config = cfg.scenary
@@ -48,5 +48,5 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    # debug()
+    debug()
     main()

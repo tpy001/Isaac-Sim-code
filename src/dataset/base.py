@@ -8,9 +8,10 @@ class BaseDataset:
         self.data = None
 
 class ACTDataset(BaseDataset):
-    def __init__(self,episode_nums = 0,*args,**kwargs):
+    def __init__(self,episode_nums = 0,is_degree =False,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.episode_ids = list(range(episode_nums))
+        self.is_degree = is_degree # if is_degree is true, the joint position in dataset is in degree
     
     def __len__(self):
         return len(self.episode_ids)
@@ -22,11 +23,24 @@ class ACTDataset(BaseDataset):
             original_action_shape = root['/action'].shape
             episode_len = original_action_shape[0]
             start_ts = 0
-            qpos_data = root['/observations/qpos'][start_ts]
+            qpos_data = root['/observations/qpos'][start_ts:]
+            action_data = root['/action'][start_ts:]
+
+            if self.is_degree:
+                # 将角度转换为弧度，同时对 gripper width 去归一化
+                for i in range(qpos_data.shape[0]):
+                    gripper_width = qpos_data[i][-1]
+                    max_width = 0.04
+                    qpos_data[i] = np.deg2rad(qpos_data[i])
+                    qpos_data[i] = np.concatenate( [qpos_data[i][:-1], [gripper_width * max_width]] )
+
+                    action_data[i] = np.deg2rad(action_data[i])
+                    action_data[i] = np.concatenate( [action_data[i][:-1], [gripper_width * max_width]] )
+                
+
             cam_name = 'front'
             image_data = root[f'/observations/images/{cam_name}'][start_ts]
          
-            action_data = root['/action'][start_ts:]
        
         # channel last
         # image_data = torch.einsum('k h w c -> k c h w', image_data)

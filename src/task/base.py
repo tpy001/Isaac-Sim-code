@@ -5,7 +5,8 @@ class BaseTask:
                  controller,
                  sensors,
                  dataset=None,
-                 replay_horizon = 0):
+                 replay_horizon = 0,
+                 replay_trajectory_index = 0):
         self.scenary = scenary
         self.robot = robot
         self.controller = controller
@@ -14,6 +15,7 @@ class BaseTask:
         self.reset_needed = False
         self.dataset = dataset
         self.replay_horizon = replay_horizon if replay_horizon != -1 else self.dataset[0]['action'].shape[0]
+        self.replay_trajectory_index = replay_trajectory_index
 
         # build task
         self.build()
@@ -85,10 +87,15 @@ class BaseTask:
 
                 if i % interval == 0:
                     if replay_count < self.replay_horizon:
-                        all_action = self.dataset[0]['action']
+                        trajectory_index = self.replay_trajectory_index
+                        all_action = self.dataset[trajectory_index]['action']
                         action = all_action[replay_count+1]
                         replay_count += 1
-                        if replay_count == self.dataset[0]['action'].shape[0]:
+
+                        # print(action[-1])
+                        # if action[-1] < 0.02:
+                        #     action[-1]  = 0
+                        if replay_count == (self.dataset[trajectory_index]['action'].shape[0] - 1):
                             break
                     else:
                         # 获取传感器数据
