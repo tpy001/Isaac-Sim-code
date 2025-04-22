@@ -3,13 +3,18 @@ class BaseTask:
                  scenary,
                  robot,
                  controller,
-                 sensors):
+                 sensors,
+                 dataset=None,
+                 replay_horizon = 0):
         self.scenary = scenary
         self.robot = robot
         self.controller = controller
         self.sensors = sensors
 
         self.reset_needed = False
+        self.dataset = dataset
+        self.replay_horizon = replay_horizon if replay_horizon != -1 else self.dataset[0]['action'].shape[0]
+
         # build task
         self.build()
 
@@ -61,6 +66,7 @@ class BaseTask:
         warm_up = 100
         i = 0
         interval = 60 // self.sensors.camera_freq
+        replay_count = 0
         while simulation_app.is_running():
             # 推进仿真并渲染
             self.scenary.step(render=True)
@@ -73,15 +79,24 @@ class BaseTask:
                 reset = self.reset_needed
                 if self.reset_needed:
                     self.reset()
+                    replay_count = 0
+                    i = 0
                     self.reset_needed = False
 
                 if i % interval == 0:
-                    # 获取传感器数据
-                    data = self.get_raw_data()
-                    data['reset'] = reset
+                    if replay_count < self.replay_horizon:
+                        all_action = self.dataset[0]['action']
+                        action = all_action[replay_count+1]
+                        replay_count += 1
+                        if replay_count == self.dataset[0]['action'].shape[0]:
+                            break
+                    else:
+                        # 获取传感器数据
+                        data = self.get_raw_data()
+                        data['reset'] = reset
 
-                    # 获取动作
-                    action = self.controller.forward(data)
+                        # 获取动作
+                        action = self.controller.forward(data)
 
                     # 控制机器人
                     self.robot.apply_action(action)

@@ -28,13 +28,25 @@ def main(cfg: DictConfig):
     controller = hydra.utils.instantiate(controller_config)
     print("Controller initialized")
   
+    # 创建数据集
+    if cfg.dataset is not None:
+        dataset_config = cfg.dataset
+        dataset = hydra.utils.instantiate(dataset_config)
+
     # 创建任务
     task_config = cfg.task
-    task = hydra.utils.instantiate(task_config,scenary=scenary,robot=robot,controller=controller,sensors=sensors)
+    task = hydra.utils.instantiate(
+        task_config,
+        scenary=scenary,
+        robot=robot,
+        controller=controller,
+        sensors=sensors,
+        dataset=dataset,
+    )
 
     task.run(simulation_app)
 
 
 if __name__ == "__main__":
-    debug()
+    # debug()
     main()
