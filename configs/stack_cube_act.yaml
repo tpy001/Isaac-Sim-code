@@ -42,7 +42,7 @@ robot:
 
 dataset:
   _target_: src.dataset.base.ACTDataset
-  dataset_dir: ./dataset/stack_cube_act_sim
+  dataset_dir: ./datasets/stack_cube_act_sim
   episode_nums: 1
 
 task:
