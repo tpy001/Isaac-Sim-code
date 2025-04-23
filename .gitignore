@@ -2,3 +2,5 @@ outputs/
 *.pyc
 datasets/
 assets/
+catkin_ws/
+Diffusion_Policy/

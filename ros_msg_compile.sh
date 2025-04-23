@@ -3,6 +3,7 @@
 cd ./catkin_ws
 # 获取 Python 路径参数
 PYTHON_PATH="$1"
+CLEAN_OPTION="$2"
 
 # 如果没有传入路径，提示用法
 if [ -z "$PYTHON_PATH" ]; then
@@ -14,12 +15,13 @@ fi
 # 获取当前目录（catkin 工作空间）
 WS_DIR=$(pwd)
 
-echo "🔧 Cleaning workspace at: $WS_DIR"
-
-# 删除旧的构建目录和缓存文件
-rm -rf "$WS_DIR/build" "$WS_DIR/devel" "$WS_DIR/CMakeCache.txt"
-
-echo "✅ Clean complete."
+# 如果传入了 --clean 参数
+if [ "$CLEAN_OPTION" == "--clean" ]; then
+    echo "� Cleaning workspace at: $WS_DIR"
+    rm -rf "$WS_DIR/build" "$WS_DIR/devel" "$WS_DIR/CMakeCache.txt"
+else
+    echo "ℹ️  Skipping workspace cleanup. To clean, use: --clean"
+fi
 
 # 编译
 echo "🚀 Running catkin_make with PYTHON_EXECUTABLE=$PYTHON_PATH ..."

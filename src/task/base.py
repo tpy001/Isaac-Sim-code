@@ -1,3 +1,6 @@
+import numpy as np
+from isaacsim.core.utils.types import ArticulationAction
+
 class BaseTask:
     def __init__(self,
                  scenary,
@@ -37,7 +40,7 @@ class BaseTask:
         self.sensors.spawn()
 
         # 4. 创建控制器    
-        self.controller.spawn()
+        self.controller.spawn(self.robot)
 
         # 5. 重置环境
         self.reset()
@@ -106,7 +109,10 @@ class BaseTask:
                         action = self.controller.forward(data)
 
                     # 控制机器人
-                    self.robot.apply_action(action)
+                    if isinstance(action, np.ndarray):
+                        self.robot.apply_action(action)
+                    elif isinstance(action,ArticulationAction):
+                        self.robot.apply_action(action.joint_positions,action.joint_indices)
 
                 i = i +1 
 
