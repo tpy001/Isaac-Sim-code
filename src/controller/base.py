@@ -6,7 +6,7 @@ from act_dp_service.msg import RawData
 import os
 from isaacsim.robot_motion.motion_generation import ArticulationKinematicsSolver,LulaKinematicsSolver
 from isaacsim.core.prims import SingleArticulation as Articulation
-
+from src.utils import Quaternion,slerp_manual
 
 
 class BaseController:
@@ -183,3 +183,125 @@ class ROSIKController(ROSServiceController):
             print("IK did not converge to a solution.  No action is being taken")
             
         return action, success
+
+class WayGenController(ROSIKController):
+    def __init__(self,waypoints=None,*args,**kwargs):
+        super().__init__(*args,**kwargs)
+        self.waypoints = waypoints
+        self.max_time_step = 0
+        if waypoints is not None:
+            self.trajectory = self.generate_smoothed_trajectory(waypoints)
+            self.max_time_step = len(self.trajectory)
+        self.current_time_step = 0
+        
+
+    def is_done(self):
+        if self.current_time_step < (self.max_time_step - 1):
+            return False
+        else:
+            return True
+        
+    def set_trajectory(self,waypoints):
+        self.waypoints = waypoints
+        self.trajectory = self.generate_smoothed_trajectory()
+        self.max_time_step = len(self.trajectory)
+        
+    def reset(self):
+        self.current_time_step = 0
+
+    def generate_smoothed_trajectory(self):
+        if not self.waypoints or 't' not in self.waypoints[0]:
+            raise ValueError("Invalid waypoints format: each waypoint must have 't', 'xyz', 'quat', and 'gripper'")
+
+        # Sort waypoints by time to ensure chronological order
+        self.waypoints.sort(key=lambda x: x['t'])
+
+        # Initialize the smoothed trajectory
+        smoothed_trajectory = []
+
+        # Interpolate between consecutive waypoints
+        for i in range(len(self.waypoints) - 1):
+            start_wp = self.waypoints[i]
+            end_wp = self.waypoints[i + 1]
+
+            start_time = start_wp['t']
+            end_time = end_wp['t']
+            duration = end_time - start_time
+
+            if duration <= 0:
+                continue  # Skip if times are not increasing
+
+            # Number of interpolation points (e.g., 60 points per second for smoothness)
+            num_points = duration  # Ensure at least 1 point
+
+            for j in range(num_points):
+                t = start_time + j
+                alpha = j / num_points
+
+                # Linear interpolation for position (xyz)
+                interpolated_pos = (1 - alpha) * np.array(start_wp['xyz']) + alpha * np.array(end_wp['xyz'])
+
+                # Convert quaternions to Quaternion objects for Slerp
+                start_quat = Quaternion(start_wp['quat'])
+                end_quat = Quaternion(end_wp['quat'])
+                # Perform spherical linear interpolation for orientation
+                interpolated_quat = slerp_manual(start_quat, end_quat, alpha)
+
+                # Linear interpolation for gripper (assuming continuous value 0 to 1)
+                interpolated_gripper = (1 - alpha) * start_wp['gripper'] + alpha * end_wp['gripper']
+
+                # Add interpolated point to trajectory
+                smoothed_trajectory.append({
+                    'time': t,
+                    'position': interpolated_pos,  # Convert back to list for consistency
+                    'orientation': interpolated_quat.elements,  # Quaternion elements [w, x, y, z]
+                    'gripper': interpolated_gripper
+                })
+
+        # Add the last waypoint to ensure the trajectory ends correctly
+        smoothed_trajectory.append({
+            'time': self.waypoints[-1]['t'],
+            'position': np.array(self.waypoints[-1]['xyz']),
+            'orientation': Quaternion(self.waypoints[-1]['quat']).elements,
+            'gripper': self.waypoints[-1]['gripper']
+        })
+
+        return smoothed_trajectory  # Return a single trajectory (assuming both arms follow the same path or adjust as needed)
+
+    def forward(self,observation):
+        if not self.is_initialized:
+             self.articulation.initialize()
+             self.is_initialized = True
+             
+        self.current_time_step += 1
+         # Ensure trajectory exists
+        if not hasattr(self, 'trajectory') or not self.trajectory:
+            raise ValueError("Trajectory not initialized. Call _generate_smoothed_trajectory first.")
+
+        # Assume self.trajectory is a tuple (left_trajectory, right_trajectory)
+        trajectory = self.trajectory
+
+        # Find the nearest trajectory points for both arms
+        target = trajectory[self.current_time_step]
+
+        # Update robot base pose
+        base_pos, base_orient = self.articulation.get_world_pose()
+        self.kinematics_solver.set_robot_base_pose(base_pos, base_orient)
+
+        # Compute IK for both arms
+        action, success = self.articulation_kinematics_solver.compute_inverse_kinematics(
+            target['position'], target['orientation']
+        )
+        
+        # Check for IK convergence and log warnings
+        if not success:
+            print(f"Warning: IK solution failed to converge - {success}")
+
+        OPEN = 0.04 # Hard code
+        CLOSE = 0.02
+        interpolate = lambda alpha: alpha * OPEN + (1 - alpha) * CLOSE
+
+        # Return actions and gripper states
+        return action,interpolate(target['gripper'])
+    
+

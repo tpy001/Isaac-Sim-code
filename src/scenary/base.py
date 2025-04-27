@@ -29,10 +29,12 @@ class BaseScenary:
         self.world.reset()
 
 class StackCubeScenary(BaseScenary):
-    def __init__(self,src_cube_cfg,target_cube_cfg,*args,**kwargs):
+    def __init__(self,src_cube_cfg = None,target_cube_cfg = None,*args,**kwargs):
         super().__init__(*args,**kwargs)
-        self.source_cube = self.add_cube(src_cube_cfg)
-        self.target_cube = self.add_cube(target_cube_cfg)
+        if src_cube_cfg is not None:
+            self.source_cube = self.add_cube(src_cube_cfg)
+        if target_cube_cfg is not None:
+            self.target_cube = self.add_cube(target_cube_cfg)
 
     def add_cube(self,cube_cfg):
         self.load_stage()
