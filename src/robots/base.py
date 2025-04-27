@@ -36,7 +36,11 @@ class BaseRobot:
         articulation_controller = self.robot.get_articulation_controller()
         articulation_controller.apply_action(target_joint_action)
 
-
+    def apply_gripper_width(self,gripper_width):
+        gripper_joint_name = self.gripper_joint_name
+        gripper_index = self.robot.get_dof_index(gripper_joint_name)
+        self.apply_action(joint_positions = [gripper_width],joint_indices = [gripper_index])
+        
     def get_joint_position(self,joint_indices= None):
         if joint_indices is None:
             joint_indices = self.joint_indices

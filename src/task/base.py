@@ -111,8 +111,11 @@ class BaseTask:
                     # 控制机器人
                     if isinstance(action, np.ndarray):
                         self.robot.apply_action(action)
-                    elif isinstance(action,ArticulationAction):
-                        self.robot.apply_action(action.joint_positions,action.joint_indices)
+                    elif isinstance(action,tuple) and isinstance(action[0],ArticulationAction): # Joint position + gripper width
+                        target_action = action[0]
+                        gripper_width = action[1]
+                        self.robot.apply_action(target_action.joint_positions,target_action.joint_indices)
+                        self.robot.apply_gripper_width(gripper_width)
 
                 i = i +1 
 

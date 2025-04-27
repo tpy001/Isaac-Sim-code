@@ -137,10 +137,11 @@ class ROSIKController(ROSServiceController):
         get_control_action = rospy.ServiceProxy(self.ros_service_name, get_action)
         next_ee_pose = get_control_action(raw_data)
         target_action = np.array(next_ee_pose.actions.data)
+        gripper_width = target_action[-1]
 
         action, success = self.IK_forward(target_action[:3], target_action[3:7])
         if success:
-            return action
+            return action, gripper_width
         else:
             return None
 
