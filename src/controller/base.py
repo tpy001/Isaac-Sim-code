@@ -6,7 +6,7 @@ from act_dp_service.msg import RawData
 import os
 from isaacsim.robot_motion.motion_generation import ArticulationKinematicsSolver,LulaKinematicsSolver
 from isaacsim.core.prims import SingleArticulation as Articulation
-from src.utils import Quaternion,slerp_manual
+from scipy.spatial.transform import Slerp,Rotation
 
 
 class BaseController:
@@ -242,10 +242,24 @@ class WayGenController(ROSIKController):
                 interpolated_pos = (1 - alpha) * np.array(start_wp['xyz']) + alpha * np.array(end_wp['xyz'])
 
                 # Convert quaternions to Quaternion objects for Slerp
-                start_quat = Quaternion(start_wp['quat'])
-                end_quat = Quaternion(end_wp['quat'])
-                # Perform spherical linear interpolation for orientation
-                interpolated_quat = slerp_manual(start_quat, end_quat, alpha)
+                start_quat = np.array(start_wp['quat'])
+                end_quat = np.array(end_wp['quat'])
+
+                # 转换为 SciPy 的 [x, y, z, w] 格式
+                start_quat = np.roll(start_quat, -1)  # [w, x, y, z] -> [x, y, z, w]
+                end_quat = np.roll(end_quat, -1)
+
+                # 创建旋转对象
+                quats = np.array([start_quat, end_quat])
+                times = [0, 1]  # 时间点：0 对应 start_quat，1 对应 end_quat
+                slerp = Slerp(times, Rotation.from_quat(quats))
+
+                # 插值
+                alpha = np.clip(alpha, 0, 1)  # 确保 alpha 在 [0, 1]
+                interpolated_quat = slerp([alpha]).as_quat()[0]
+
+                # 转换回 [w, x, y, z] 格式（如果需要）
+                interpolated_quat = np.roll(interpolated_quat, 1)
 
                 # Linear interpolation for gripper (assuming continuous value 0 to 1)
                 interpolated_gripper = (1 - alpha) * start_wp['gripper'] + alpha * end_wp['gripper']
@@ -254,7 +268,7 @@ class WayGenController(ROSIKController):
                 smoothed_trajectory.append({
                     'time': t,
                     'position': interpolated_pos,  # Convert back to list for consistency
-                    'orientation': interpolated_quat.elements,  # Quaternion elements [w, x, y, z]
+                    'orientation': interpolated_quat,  # Quaternion elements [w, x, y, z]
                     'gripper': interpolated_gripper
                 })
 
@@ -262,7 +276,7 @@ class WayGenController(ROSIKController):
         smoothed_trajectory.append({
             'time': self.waypoints[-1]['t'],
             'position': np.array(self.waypoints[-1]['xyz']),
-            'orientation': Quaternion(self.waypoints[-1]['quat']).elements,
+            'orientation': self.waypoints[-1]['quat'],
             'gripper': self.waypoints[-1]['gripper']
         })
 
