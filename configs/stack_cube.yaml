@@ -1,7 +1,7 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.StackCubeScenary
-  usd_file_path: "/home/tay/Desktop/Robot/Asset/FastUMI/data_collect.usd"
+  usd_file_path: "./assets/data_collect.usd"
   src_cube_cfg: {
       name: cube_red,
       position: [ 0.31164142, -0.11513411,  0.18      ],

@@ -1,7 +1,7 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.BaseScenary
-  usd_file_path: "/home/tay/Desktop/Robot/Asset/FastUMI/realman_env_2.usd"
+  usd_file_path: "./assets/realman_env_2.usd"
 
 controller:
   _target_: src.controller.base.ROSServiceController
@@ -24,14 +24,15 @@ robot:
 
 dataset:
   _target_: src.dataset.base.ACTDataset
-  dataset_dir: ./datasets/grasp_corn_real
-  episode_nums: 8
+  dataset_dir: ./datasets/grasp_corn_real_pan
+  episode_nums: 1
   is_degree: true
 
 task:
   _target_: src.task.base.BaseTask
-  replay_horizon: -1  # -1 代表 replay 所有数据
-  replay_trajectory_index: 7
+  replay_horizon: 0  # -1 代表 replay 所有数据
+  replay_trajectory_index: 0
+  # eval_open_loop_loss: true # 在 replay 的过程中，是否需要评估开环的Loss
 
 
 sensor_list: []    # 可以加入更多 sensor 配置  

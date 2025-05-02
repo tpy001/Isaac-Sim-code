@@ -1,7 +1,7 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.BaseScenary
-  usd_file_path: "/home/tay/Desktop/Robot/Asset/FastUMI/data_collect.usd"
+  usd_file_path: "./assets/data_collect.usd"
 
 controller:
   _target_: src.controller.base.BaseController

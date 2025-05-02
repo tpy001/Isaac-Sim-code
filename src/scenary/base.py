@@ -7,7 +7,7 @@ from src.utils import to_numpy_recursive
 
 class BaseScenary:
     def __init__(self, usd_file_path):
-        self.usd_file_path = usd_file_path
+        self.usd_file_path = os.path.join( os.getcwd(), usd_file_path)
         self.world = None
         self.stage = None
         self.loaded = False

@@ -1,11 +1,11 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.StackCubeScenary
-  usd_file_path: "/home/tay/Desktop/Robot/Asset/FastUMI/data_collect.usd"
+  usd_file_path: "./assets/Franka_env_3.usd"
   src_cube_cfg: {
       name: cube_red,
-      position:  [0.25, 0.0,  0.098],
-      # orientation: [0.951017,0.000000,0.000000,0.309137],
+      position:  [0.659703, -0.233137,  0.120000],
+      orientation: [0.975059,0.000000,0.000000,0.221946],
       prim_path: /World/Cube,
       scale: [0.04, 0.04, 0.04],
       size: 1.0,
@@ -13,14 +13,13 @@ scenary:
   }
   target_cube_cfg: {
       name: cube_blue,
-      position: [0.5, -0.18138, 0.18],
-      # orientation: [0.951017,0.000000,0.000000,0.309137],
+      position: [0.681631,0.057882, 0.120000],
+      orientation: [0.975059,0.000000,0.000000,0.221946],
       prim_path: /World/Cube2,
       scale: [0.05, 0.05, 0.05],
       size: 1.0,
       color: [0, 0, 1]
   }
-
 controller:
   _target_: src.controller.base.ROSIKController
   ros_service_name: sensor_processing
