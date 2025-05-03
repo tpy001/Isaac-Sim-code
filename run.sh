@@ -36,8 +36,7 @@ echo "$PYTHON_EXECUTABLE"
 source ./catkin_ws/devel/setup.bash
 # 5. 运行 Python 脚本
 
-DEFAULT_SCRIPT="Hello_World.py"  # 默认脚本
-SCRIPT_TO_RUN="${1:-$DEFAULT_SCRIPT}"
+config=$1
 
-echo "✅ 正在运行：$SCRIPT_TO_RUN"
-"$PYTHON_EXECUTABLE" "$SCRIPT_TO_RUN"
+
+"$PYTHON_EXECUTABLE" main.py --config-name=$config
