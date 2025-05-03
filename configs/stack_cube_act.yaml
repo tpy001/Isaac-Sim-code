@@ -2,10 +2,11 @@
 scenary:
   _target_: src.scenary.base.StackCubeScenary
   usd_file_path: "./assets/Franka_env_3.usd"
+  random: False
   src_cube_cfg: {
       name: cube_red,
-      position: [0.586757,-0.174030,0.120000],
-      orientation: [0.951017,0.000000,0.000000,0.309137],
+      position: [0.511521,0.154694,0.120000],
+      orientation: [0.966067,0.000000,0.000000,0.258293],
       prim_path: /World/Cube,
       scale: [0.05, 0.05, 0.05],
       size: 1.0,
@@ -13,8 +14,8 @@ scenary:
   }
   target_cube_cfg: {
       name: cube_blue,
-      position: [0.561296,0.227596,0.120000],
-      orientation: [0.951017,0.000000,0.000000,0.309137],
+      position: [0.509482,-0.122161,0.120000],
+      orientation: [0.966067,0.000000,0.000000,0.258293],
       prim_path: /World/Cube2,
       scale: [0.05, 0.05, 0.05],
       size: 1.0,

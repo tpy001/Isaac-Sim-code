@@ -2,8 +2,9 @@ import numpy as np
 from isaacsim.core.utils.types import ArticulationAction
 from isaacsim.core.utils.rotations import euler_angles_to_quat
 import os
-from src.utils import quaternion_to_rotvec
+from src.utils import quaternion_to_rotvec,set_prim_transform
 from PIL import Image
+import random
 
 class BaseTask:
     def __init__(self,
@@ -142,10 +143,11 @@ class StackCubeDataCollect(BaseTask):
         os.makedirs(new_episode_dir)  # 创建新目录
         return new_episode_dir
 
-    def __init__(self,save_dir = "./output_data", *args,**kwargs):
+    def __init__(self,save_dir = "./output_data", save_trajectory = True,*args,**kwargs):
 
         super().__init__(*args,**kwargs)
         
+        self.save_trajectory = save_trajectory
         self.img_count = 0
         self.save_dir = self.get_next_episode_dir(save_dir)
         os.makedirs(self.save_dir,exist_ok=True)
@@ -211,12 +213,12 @@ class StackCubeDataCollect(BaseTask):
 
         trajectory = [
             {"t": 0, "xyz": init_pos, "quat": init_orientation, "gripper": 1.0},  # Start 
-            {"t": 100, "xyz": [pos_red[0], pos_red[1], pos_red[2] + 0.20], "quat": init_orientation, "gripper": 1.0},  # 靠近
-            {"t": 140, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 1.0},  # 下沉
-            {"t": 170, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 0.1},  # 抓取
-            {"t": 230, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.20], "quat": gripper_quat, "gripper": 0.1},  # 移动
-            {"t": 270, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 0.1},  # 下沉
-            {"t": 300, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 1.0},  # 释放
+            {"t": 67, "xyz": [pos_red[0], pos_red[1], pos_red[2] + 0.20], "quat": init_orientation, "gripper": 1.0},  # 靠近
+            {"t": 95, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 1.0},  # 下沉
+            {"t": 110, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 0.1},  # 抓取
+            {"t": 150, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.20], "quat": gripper_quat, "gripper": 0.1},  # 移动
+            {"t": 180, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 0.1},  # 下沉
+            {"t": 200, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 1.0},  # 释放
         ]
         
 
@@ -288,11 +290,18 @@ class StackCubeDataCollect(BaseTask):
                 if i % interval == 0:
                     # 获取传感器数据
                     data = self.get_raw_data()
-                    data['reset'] = reset
-                    data_list.append(data)
-
                     # 获取动作
                     action = self.controller.forward(data)
+                    data['reset'] = reset
+                    if self.save_trajectory:
+                        # 直接存储专家轨迹作为 action
+                        t = self.controller.current_time_step
+                        data['action_ee_pose'] = ( self.controller.trajectory[t]['position'],  self.controller.trajectory[t]['orientation'] )
+                        data['action_joint_pos'] = np.concatenate( [action[0].joint_positions, np.array([  action[1]])]) 
+                        data['action_gripper_width'] =  action[1]
+                    data_list.append(data)
+
+                  
                     
                     # 控制机器人
                     if isinstance(action, np.ndarray):
@@ -333,9 +342,13 @@ class StackCubeDataCollect(BaseTask):
         os.makedirs(data_dir, exist_ok=True)
         
         cur_pos_list = []
+        action_pos_list = []
         cur_orientation_list = []
+        action_orientation_list = []
         gripper_width_list = []
+        action_gripper = []
         joint_pos_list = []
+        action_joints = []
 
         init_joint_pos = data_list[0]["init_joint_pos"]
         init_pos = data_list[0]["ee_pose"][0]
@@ -349,9 +362,15 @@ class StackCubeDataCollect(BaseTask):
             cur_orientation_list.append(item["ee_pose"][1])
             gripper_width_list.append([item["gripper_width"]])  # 注意要加中括号，保持二维
             joint_pos_list.append(item["joint_pos"])
+
+            action_pos_list.append(item["action_ee_pose"][0])
+            action_orientation_list.append(item["action_ee_pose"][1])
+            action_gripper.append(item["action_gripper_width"])
+            action_joints.append(item["action_joint_pos"])
             
         # 处理旋转表示
         cur_orientation_rotvec = [quaternion_to_rotvec(q) for q in cur_orientation_list]
+        action_ori_rotevc = [quaternion_to_rotvec(q) for q in action_orientation_list]
         init_orientation_rotvec = quaternion_to_rotvec(init_orientation)
         end_orientation_rotvec = quaternion_to_rotvec(end_orientation)
 
@@ -359,13 +378,21 @@ class StackCubeDataCollect(BaseTask):
         np.savetxt(os.path.join(data_dir, "robot0_init_joint_positions.txt"), init_joint_pos, fmt='%.6f')
         #存储机器人关节pos数据
         np.savetxt(os.path.join(data_dir, "robot0_joint_positions.txt"), joint_pos_list, fmt='%.6f')
+        np.savetxt(os.path.join(data_dir, "robot0_action_joint_positions.txt"), action_joints, fmt='%.6f')
+
 
         # 存储机器人数据
         np.savetxt(os.path.join(data_dir, "robot0_gripper_width.txt"), gripper_width_list, fmt='%.6f')
+        np.savetxt(os.path.join(data_dir, "robot0_action_gripper_width.txt"), action_gripper, fmt='%.6f')
+
         
         # 存储轨迹数据
         np.savetxt(os.path.join(data_dir, "robot0_eef_position.txt"), cur_pos_list, fmt='%.6f')
+        np.savetxt(os.path.join(data_dir, "robot0_action_eef_position.txt"), action_pos_list, fmt='%.6f')
+
         np.savetxt(os.path.join(data_dir, "robot0_eef_rot_axis_angle.txt"), cur_orientation_rotvec, fmt='%.6f')
+        np.savetxt(os.path.join(data_dir, "robot0_action_eef_rot_axis_angle.txt"), action_ori_rotevc, fmt='%.6f')
+
         
         # 存储初始和结束状态
         np.savetxt(os.path.join(data_dir, "robot0_init_position.txt"), init_pos, fmt='%.6f')

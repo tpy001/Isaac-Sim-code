@@ -4,6 +4,18 @@ import numpy as np
 from PIL import Image
 import h5py
 
+def debug():
+    import debugpy
+
+    # 启动调试器，指定调试端口
+    debugpy.listen(5679)
+
+    print("Waiting for debugger to attach...")
+
+    # 在这里设置断点
+    debugpy.wait_for_client()
+
+# debug()
 def natural_sort_key(s):
     """
     自然排序的关键函数，用于提取字符串中的数字部分。
@@ -32,6 +44,13 @@ def process_episode(episode_folder, output_file):
     qpos_file = os.path.join(data_folder, "robot0_joint_positions.txt")
     qpos_data = np.loadtxt(qpos_file)
 
+    try:
+        action_file = os.path.join(data_folder, "robot0_action_joint_positions.txt")
+        action_data = np.loadtxt(action_file)
+    except:
+        print("Warning: no action data found in saved episode. Try use qpos_data as action data")
+        action_data = qpos_data
+
     # 确保图像数量和 qpos 数据行数一致
     assert len(images_data) == len(qpos_data), "图像数量和 qpos 数据行数不一致"
 
@@ -50,7 +69,7 @@ def process_episode(episode_folder, output_file):
         qpos_dataset = observations_group.create_dataset("qpos", data=qpos_data, compression="gzip")
         
         # 创建 action 数据集（假设 action 是 qpos 的复制）
-        action_dataset = hdf5_file.create_dataset("action", data=qpos_data, compression="gzip")
+        action_dataset = hdf5_file.create_dataset("action", data=action_data, compression="gzip")
 
 def process_all_episodes(base_folder, output_folder):
     """
@@ -62,7 +81,7 @@ def process_all_episodes(base_folder, output_folder):
     os.makedirs(output_folder, exist_ok=True)
 
     # 获取所有 episode 文件夹
-    episode_folders = sorted([os.path.join(base_folder, d) for d in os.listdir(base_folder) if d.startswith("epo_")])
+    episode_folders =  sorted([os.path.join(base_folder, d) for d in os.listdir(base_folder) if d.startswith("epo_")],key=natural_sort_key)
 
     for i, episode_folder in enumerate(episode_folders):
         output_file = os.path.join(output_folder, f"episode_{i}.hdf5")

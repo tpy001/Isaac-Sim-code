@@ -1,12 +1,14 @@
-import hydra
-from src.utils import debug
-
-from omegaconf import DictConfig
 
 from omni.isaac.kit import SimulationApp
 simulation_app = SimulationApp({"headless": False})
 
-@hydra.main(config_path="./configs", config_name="stack_cube_dp_franka",version_base="1.3.2")
+from src.utils import debug
+from omegaconf import DictConfig
+import hydra
+
+
+# @hydra.main(config_path="./configs", config_name="lift_cube_act",version_base="1.3.2")
+@hydra.main(config_path="./configs", config_name="stack_cube_data_collect",version_base="1.3.2")
 def main(cfg: DictConfig):
     # 根据配置创建场景
     scenary_config = cfg.scenary
@@ -48,5 +50,5 @@ def main(cfg: DictConfig):
 
 
 if __name__ == "__main__":
-    debug()
+    # debug()
     main()
