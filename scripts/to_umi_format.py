@@ -60,7 +60,6 @@ def images_to_numpy(image_dir):
     return np.stack(images, axis=0)
 
 def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
-    debug()
 
     # 创建 Zarr ZIP 存储
     store = zarr.ZipStore(output_zarr, mode="w")
@@ -86,6 +85,7 @@ def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
             "robot0_end_orientation": "robot0_end_orientation.txt",
             "robot0_end_position": "robot0_end_position.txt",
             "robot0_gripper_width": "robot0_gripper_width.txt",
+            "robot0_action_gripper_width": "robot0_action_gripper_width.txt",
             "robot0_init_orientation": "robot0_init_orientation.txt",
             "robot0_init_position": "robot0_init_position.txt"
         }
@@ -120,7 +120,9 @@ def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
 
         del dict['robot0_init_orientation'], dict['robot0_init_position'], dict['robot0_end_position'],dict['robot0_end_orientation']
         
-        joint_data[epoch_name] = dict
+        # 拼接 action
+        dict['robot0_action'] = np.concatenate( [ dict['robot0_action_eef_position'], dict['robot0_action_eef_rot_axis_angle'], np.expand_dims(dict['robot0_action_gripper_width'],axis=1) ],axis=-1)
+        joint_data[epoch_name] = dict 
 
     # ✅ 4. 合并所有 epoch
     key_order = epoch_name_list
@@ -128,12 +130,12 @@ def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
     robot0_demo_start_pose_ = np.concatenate([joint_data[key]['robot0_demo_start_pose'] for key in key_order], axis=0)
     robot0_demo_end_pose_ = np.concatenate([joint_data[key]['robot0_demo_end_pose'] for key in key_order], axis=0)
     robot0_eef_position_ = np.concatenate([joint_data[key]['robot0_eef_position'] for key in key_order], axis=0)
-    robot0_eef_position_action = np.concatenate([joint_data[key]['robot0_action_eef_position'] for key in key_order], axis=0)
 
     robot0_eef_rot_axis_angle_ = np.concatenate([joint_data[key]['robot0_eef_rot_axis_angle'] for key in key_order], axis=0)
-    robot0_eef_rot_axis_angle_action = np.concatenate([joint_data[key]['robot0_action_eef_rot_axis_angle'] for key in key_order], axis=0)
 
     robot0_gripper_width_ = np.concatenate([joint_data[key]['robot0_gripper_width'] for key in key_order], axis=0)
+
+    robot0_action = np.concatenate([joint_data[key]['robot0_action'] for key in key_order], axis=0)
 
     assert camera_rgb_.shape[0] == robot0_eef_position_.shape[0]
 
@@ -142,10 +144,11 @@ def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
     root.create_dataset(f"data/robot0_demo_start_pose", data=robot0_demo_start_pose_, dtype=data.dtype, chunks=True)
     root.create_dataset(f"data/robot0_demo_end_pose", data=robot0_demo_end_pose_, dtype=data.dtype, chunks=True)
     root.create_dataset(f"data/robot0_eef_pos", data=robot0_eef_position_, dtype=data.dtype, chunks=True)
-    root.create_dataset(f"data/robot0_eef_pos_action", data=robot0_eef_position_action, dtype=data.dtype, chunks=True)
     root.create_dataset(f"data/robot0_eef_rot_axis_angle", data=robot0_eef_rot_axis_angle_, dtype=data.dtype, chunks=True)
-    root.create_dataset(f"data/robot0_eef_rot_axis_angle_action", data=robot0_eef_rot_axis_angle_action, dtype=data.dtype, chunks=True)
     root.create_dataset(f"data/robot0_gripper_width", data=np.expand_dims(robot0_gripper_width_, axis=-1), dtype=data.dtype, chunks=True)
+
+    root.create_dataset(f"data/action", data=robot0_action, dtype=data.dtype, chunks=True)
+
 
     print(np.expand_dims(robot0_gripper_width_, axis=-1).shape)
     root.create_dataset(f"meta/episode_ends", data=np.array(epoch_len_list), dtype=np.int32, chunks=False)
@@ -154,9 +157,9 @@ def convert_back_to_zarr(input_dir, output_zarr,epoch_name_list):
     print(f"Zarr reconstruction completed: {output_zarr}")
 
 if __name__ == "__main__":
-    input_dir = "./data_collect_stack_cubv2"  # CSV 和 PNG 文件所在的目录
+    input_dir = "./data/data_collect_stack_cubv2"  # CSV 和 PNG 文件所在的目录
     output_zarr = "./train_data.zarr.zip"
-
+    # debug()
     epoch_nums = 52
     # excluded_epochs = {7, 15, 24,29,37, 39}  # 需要排除的epoch
     excluded_epochs = {}
