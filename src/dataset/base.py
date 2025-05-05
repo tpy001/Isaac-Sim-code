@@ -16,13 +16,12 @@ class ACTDataset(BaseDataset):
     def __len__(self):
         return len(self.episode_ids)
     
-    def __getitem__(self, index):
+    def __getitem__(self, index,start_ts=0):
         episode_id = self.episode_ids[index]
         dataset_path = os.path.join(self.dataset_dir, f'episode_{episode_id}.hdf5')
         with h5py.File(dataset_path, 'r') as root:
             original_action_shape = root['/action'].shape
             episode_len = original_action_shape[0]
-            start_ts = 0
             qpos_data = root['/observations/qpos'][start_ts:]
             action_data = root['/action'][start_ts:]
 

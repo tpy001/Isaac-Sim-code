@@ -3,4 +3,7 @@ outputs/
 datasets/
 assets/
 catkin_ws/
-Diffusion_Policy/
+data/
+Diffusion_Policy
+data_collect/
+.vscode/

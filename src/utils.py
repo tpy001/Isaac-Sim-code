@@ -32,7 +32,19 @@ def to_numpy_recursive(cfg):
 
 
 
-
+def set_seed(seed,deterministic=False):
+    import random
+    import torch
+    import numpy as np 
+    random.seed(seed)  # Python 内置随机模块
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)  # 为当前GPU设置种子
+    torch.cuda.manual_seed_all(seed)  # 如果使用多个GPU
+    if deterministic:
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        
 def quaternion_to_rotvec(quat):
     """
     将四元数 (w, x, y, z) 转换为旋转向量 (Rodrigues 旋转公式).

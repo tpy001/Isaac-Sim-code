@@ -5,10 +5,14 @@ simulation_app = SimulationApp({"headless": False})
 from src.utils import debug
 from omegaconf import DictConfig
 import hydra
+from src.utils import set_seed
 
 
 @hydra.main(config_path="./configs", config_name="stack_cube_dp_franka",version_base="1.3.2")
 def main(cfg: DictConfig):
+    if cfg.seed is not None:
+        set_seed(cfg.seed)
+
     # 根据配置创建场景
     scenary_config = cfg.scenary
     scenary = hydra.utils.instantiate(scenary_config)

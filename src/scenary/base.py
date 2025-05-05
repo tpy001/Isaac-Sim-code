@@ -55,8 +55,10 @@ class StackCubeScenary(BaseScenary):
     def random_gen(self):
         # 随机生成位置
          # 设定随机范围
-        x_range = (0.5, 0.7)  # X 轴范围
-        y_range = (-0.3, 0.3)  # Y 轴范围
+         # 设定随机范围
+        x_range = (0.5, 0.6)  # X 轴范围
+        x_range_shifted = (x_range[0] + 0.05, x_range[1] + 0.05)
+        y_range = (-0.15, 0.15)  # Y 轴范围
 
         # 随机 yaw 角度（单位：弧度）
         yaw = np.random.uniform(-np.pi/4, np.pi/4)
@@ -71,7 +73,7 @@ class StackCubeScenary(BaseScenary):
         ])
 
         pos_green = np.array([
-            np.random.uniform(*x_range),
+            np.random.uniform(*x_range_shifted),
             np.random.uniform(*y_range),
             0.12
         ])

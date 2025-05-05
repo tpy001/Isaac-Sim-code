@@ -153,8 +153,9 @@ class StackCubeDataCollect(BaseTask):
         os.makedirs(self.save_dir,exist_ok=True)
 
         # 设定随机范围
-        x_range = (0.5, 0.7)  # X 轴范围
-        y_range = (-0.3, 0.3)  # Y 轴范围
+        x_range = (0.5, 0.6)  # X 轴范围
+        x_range_shifted = (x_range[0] + 0.05, x_range[1] + 0.05)
+        y_range = (-0.15, 0.15)  # Y 轴范围
 
         # 随机 yaw 角度（单位：弧度）
         yaw = np.random.uniform(-np.pi/4, np.pi/4)
@@ -169,12 +170,12 @@ class StackCubeDataCollect(BaseTask):
         ])
 
         pos_green = np.array([
-            np.random.uniform(*x_range),
+            np.random.uniform(*x_range_shifted),
             np.random.uniform(*y_range),
             0.12
         ])
-        #保证两个物体不重叠
-        while np.linalg.norm(pos_red - pos_green) < 0.2:
+
+        while np.linalg.norm(pos_red - pos_green) < 0.1:
             pos_green = np.array([
                 np.random.uniform(*x_range),
                 np.random.uniform(*y_range),
@@ -213,12 +214,12 @@ class StackCubeDataCollect(BaseTask):
 
         trajectory = [
             {"t": 0, "xyz": init_pos, "quat": init_orientation, "gripper": 1.0},  # Start 
-            {"t": 67, "xyz": [pos_red[0], pos_red[1], pos_red[2] + 0.20], "quat": init_orientation, "gripper": 1.0},  # 靠近
-            {"t": 95, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 1.0},  # 下沉
-            {"t": 110, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 0.1},  # 抓取
-            {"t": 150, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.20], "quat": gripper_quat, "gripper": 0.1},  # 移动
-            {"t": 180, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 0.1},  # 下沉
-            {"t": 200, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 1.0},  # 释放
+            {"t": 40, "xyz": [pos_red[0], pos_red[1], pos_red[2] + 0.20], "quat": init_orientation, "gripper": 1.0},  # 靠近
+            {"t": 60, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 1.0},  # 下沉
+            {"t": 68, "xyz": [pos_red[0], pos_red[1], pos_red[2] - 0.01], "quat": gripper_quat, "gripper": 0.1},  # 抓取
+            {"t": 93, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.20], "quat": gripper_quat, "gripper": 0.1},  # 移动
+            {"t": 112, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 0.1},  # 下沉
+            {"t": 125, "xyz": [pos_green[0], pos_green[1], pos_green[2] + 0.10], "quat": gripper_quat, "gripper": 1.0},  # 释放
         ]
         
 
