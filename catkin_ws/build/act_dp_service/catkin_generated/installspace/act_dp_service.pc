@@ -1,0 +1,8 @@
+prefix=/home/tay/Desktop/Robot/code/isaac_sim_code/catkin_ws/install
+
+Name: act_dp_service
+Description: Description of act_dp_service
+Version: 0.0.0
+Cflags: -I${prefix}/include
+Libs: -L${prefix}/lib 
+Requires: rospy std_msgs message_runtime geometry_msgs
