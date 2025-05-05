@@ -1,7 +1,8 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.StackCubeScenary
-  usd_file_path: "./assets/Franka_env_3.usd"
+  # usd_file_path: "./assets/Franka_env_3.usd"
+  usd_file_path: "./assets/Franka_env_4.usd"
 
 controller:
   _target_: src.controller.base.WayGenController

@@ -1,20 +1,22 @@
 # config.yaml
 scenary:
   _target_: src.scenary.base.StackCubeScenary
-  usd_file_path: "./assets/Franka_env_3.usd"
+  # usd_file_path: "./assets/Franka_env_3.usd"
+  usd_file_path: "./assets/Franka_env_4.usd"
+  random: False
   src_cube_cfg: {
       name: cube_red,
-      position:  [  0.610024, 0.098442,  0.120000],
-      orientation: [0.938812,0.000000,0.000000,0.344430],
+      position: [  0.560670,-0.105259,0.120000],
+      orientation: [0.998914,0.000000,0.000000,-0.046590],
       prim_path: /World/Cube,
-      scale: [0.04, 0.04, 0.04],  
+      scale: [0.05, 0.05, 0.05],
       size: 1.0,
-      color: [1, 0, 0] 
-  }  
-  target_cube_cfg: {
-      name: cube_blue, 
-      position: [0.681496,-0.243613, 0.120000],
-      orientation: [0.938812,0.000000,0.000000,0.344430],
+      color: [1, 0, 0]
+  }
+  target_cube_cfg: { 
+      name: cube_blue,
+      position: [0.600718,0.037329,0.120000],
+      orientation: [0.998914,0.000000,0.000000,-0.046590],
       prim_path: /World/Cube2,
       scale: [0.05, 0.05, 0.05],
       size: 1.0,
@@ -53,4 +55,5 @@ task:
   replay_horizon: 0  # -1 代表 replay 所有数据
 
 sensor_list: []    # 可以加入更多 sensor 配置  
-seed: 0
+
+seed: 111
