@@ -1,2 +1,0 @@
-act_dp_service
--DPYTHON_EXECUTABLE=/home/tay/Desktop/isaac_sim/kit/python/bin/python3 -DCATKIN_WHITELIST_PACKAGES=act_dp_service -DCATKIN_DEVEL_PREFIX=/home/tay/Desktop/Robot/code/isaac_sim_code/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/tay/Desktop/Robot/code/isaac_sim_code/catkin_ws/install -G Unix Makefiles
