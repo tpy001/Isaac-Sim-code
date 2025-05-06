@@ -81,17 +81,36 @@ source ~/.bashrc
     roscore
 ```
 
-#### Step4: 安装 ACT 和 Diffusion Policy 环境
-(1) 安装 ACT 环境
+### Step4: 下载源代码和所需资源
+**方式1: 直接从服务器上下载整合包**
+
+路径位于 /data/tangpeiyuan/Isaac-Sim-code.zip
+
+**方式2：从网络下载资源**
+
+从 github 上克隆源代码：
 ```
     git clone https://github.com/tpy001/Isaac-Sim-code.git 
+```
+下载所需的素材和模型权重, 从谷歌网盘上下载对应的资源，然后解压存放到 Isaac-Sim-code 里的指定目录下
+
+| 文件名 | 下载地址 | 存放路径 | 说明 | 
+| ----|  ----|   ----| ----| 
+| assets.zip | [下载链接](https://drive.google.com/file/d/1YO-QUmsUO1EL6-ufekpOuxfi8pEyNPSb/view) | assets/ | USD 场景描述文件，可导入 Isaac Sim 生成场景|
+| policy_best.ckpt | [下载链接](https://drive.google.com/file/d/195WMK5dS404OvDBJuZ_8LmOHY6cbPX_0/view?usp=drive_link) | act/ckpt/stack_cube_simv3/ | act 用于 stack cube 的模型权重 |
+| dataset_stats.pkl | [下载链接](https://drive.google.com/file/d/1Y4wgCPAUgqHqvmcaK4Qf04QZvR0amXHW/view?usp=drive_link) | act/ckpt/stack_cube_simv3/ | act 数据集相关参数
+| stack_cube_simv3.ckpt/ | [下载链接](https://drive.google.com/file/d/1yts-3JZrXCnVMRMQQIN6ScpOfNXdr89i/view?usp=drive_link) | umi/ckpt | dp 用于 stack cube 的模型权重
+
+
+### Step5: 安装 ACT 和 Diffusion Policy 环境
+(1) 安装 ACT 环境
+```
+    
     cd Isaac-Sim-code/act
     conda create -n aloha python=3.8.10
     conda activate alpha
     pip install torch==2.1.0 torchvision==0.16.0 torchaudio==2.1.0 --index-url https://download.pytorch.org/whl/cu121
     pip install pyquaternion
-    pip install pyyaml
-    pip install rospkg
     pip install pexpect
     pip install mujoco==2.3.7
     pip install dm_control==1.0.14
@@ -101,6 +120,7 @@ source ~/.bashrc
     pip install packaging
     pip install h5py
     pip install ipython
+    pip install rospkg==1.6.0 pyparsing==2.4.6 pyyaml==5.3.1 empy==3.3.2
     cd detr/ && pip install -e . # 进入 act 根目录下的 detr/
 ```
 (2) 安装 Diffusion Policy 环境
@@ -108,9 +128,11 @@ source ~/.bashrc
     cd Isaac-Sim-code/umi
     sudo apt install -y libosmesa6-dev libgl1-mesa-glx libglfw3 patchelf
     conda env create -f conda_environment.yaml
+    conda activate umi
+    pip install rospkg==1.6.0 pyparsing==2.4.6 pyyaml==5.3.1 empy==3.3.2
 ```
 
-#### Step5: 编译 ROS
+### Step6: 编译 ROS
 为了让 isaac sim, act, diffusion policy 识别自定义的 ROS 消息的服务，需要把 ROS 编译到这三个环境里 (貌似只编译到 Isaac Sim 也行)
 #### (1) 编译到 Isaac Sim
 安装一些必要的包到 Isaac Sim 环境，假设 isaac sim 安装的根目录的路径为 <isaac_sim>
@@ -141,3 +163,54 @@ Scanning dependencies of target act_dp_service_generate_messages
     python  # 进入 python
     from act_dp_service.srv import get_action, get_actionResponse # 如果执行这条语句没显示 "No module named ..."，则代表前面的操作是成功的
 ```
+
+### Step7: 运行 Stack Cube 任务
+
+运行该任务需要启动三个终端，分别用于 Isaac Sim, ROS, ACT或DP 算法，整体的运行逻辑如下图所示：
+![整体框架](./media/整体框架.png)
+(1) 运行 ROS
+```
+    roscore
+```
+(2) 运行用于 Stack Cube 的 Isaac Sim 仿真环境
+修改 Isaac-Sim-code 目录下的 run.sh 文件的第一行
+run.sh 内容
+```
+    isaac_sim_root=~/Desktop/isaac_sim #  替换为你的 Isaac Sim 的根目录
+    ......
+```
+运行：
+``` 
+    cd Isaac-Sim-code
+    ./run.sh stack_cube_act_v3
+```
+
+(3) 运行 ACT 或 DP 算法
+运行 act：
+```
+    cd Isaac-Sim-code/act
+    source ../catkin_ws/devel/setup.bash
+
+    python3 server.py \
+    --task_name stake_cube_scripted \
+    --ckpt_dir ckpt/stack_cube_simv3 \
+    --policy_class ACT --kl_weight 10 --chunk_size 20 --hidden_dim 512 --batch_size 8 --dim_feedforward 3200 \
+    --num_epochs 2000  --lr 1e-5 \
+    --seed 0 --eval --temporal_agg
+```
+运行成功的结果：
+<video controls>
+    <source src="media/act_success.mp4" type="video/mp4"> 
+    Act 算法运行成功的结果
+</video>
+运行 dp:
+```
+    cd Isaac-Sim-code/umi
+    source ../catkin_ws/devel/setup.bash
+    python3 scripts_sim/inference_umi.py --ckpt_path ckpt/stack_cube_simv3.ckpt --n_action_steps 4
+```
+运行成功的结果：
+<video controls>
+    <source src="media/dp_success.mp4" type="video/mp4"> 
+    Act 算法运行成功的结果
+</video>

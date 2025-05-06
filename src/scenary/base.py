@@ -78,7 +78,7 @@ class StackCubeScenary(BaseScenary):
             0.12
         ])
         #保证两个物体不重叠
-        while np.linalg.norm(pos_red - pos_green) < 0.2:
+        while np.linalg.norm(pos_red - pos_green) < 0.1:
             pos_green = np.array([
                 np.random.uniform(*x_range),
                 np.random.uniform(*y_range),
