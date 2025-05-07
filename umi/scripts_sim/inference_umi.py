@@ -360,8 +360,8 @@ def main(raw_data):
     if len(action_buffer) != 0:
         target_action = action_buffer.popleft()
     else:
-
-        init_ee_pose = np.array(raw_data.sensor.init_joint_pos.data)  # wxyz 格式的四元数表示旋转
+        # 输入是世界坐标系下的绝对 pose + 第 0 时刻的 pose +  RGB 图像
+        init_ee_pose = np.array(raw_data.sensor.init_ee_pose.data)  # wxyz 格式的四元数表示旋转
         rot_vec = quaternion_to_rotvec(init_ee_pose[3:7])
         init_ee_pose = np.concatenate([init_ee_pose[:3], rot_vec])  # shape: (6,)
 
