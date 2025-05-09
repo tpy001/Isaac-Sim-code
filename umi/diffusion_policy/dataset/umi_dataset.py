@@ -40,6 +40,7 @@ class UmiDataset(BaseDataset):
         max_duration: Optional[float]=None
     ):
         self.pose_repr = pose_repr
+        # 使用相对还是绝对位姿
         self.obs_pose_repr = self.pose_repr.get('obs_pose_repr', 'rel')
         self.action_pose_repr = self.pose_repr.get('action_pose_repr', 'rel')
         
@@ -123,6 +124,7 @@ class UmiDataset(BaseDataset):
         key_latency_steps['action'] = shape_meta['action']['latency_steps']
         key_down_sample_steps['action'] = shape_meta['action']['down_sample_steps']
 
+        # 生成 mask，mask 的部分作为验证集
         val_mask = get_val_mask(
             n_episodes=replay_buffer.n_episodes, 
             val_ratio=val_ratio,

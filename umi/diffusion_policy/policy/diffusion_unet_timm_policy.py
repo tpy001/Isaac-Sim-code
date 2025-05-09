@@ -131,7 +131,8 @@ class DiffusionUnetTimmPolicy(BaseImagePolicy):
         B = next(iter(nobs.values())).shape[0]
 
         # condition through global feature
-        global_cond = self.obs_encoder(nobs)
+        # global_cond = self.obs_encoder(nobs)
+        global_cond = self.obs_encoder.inference(nobs)
 
         # empty data for action
         cond_data = torch.zeros(size=(B, self.action_horizon, self.action_dim), device=self.device, dtype=self.dtype)
