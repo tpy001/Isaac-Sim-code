@@ -1,5 +1,7 @@
 # 输入: 传感器数据
-RawData sensor
+act_dp_service/SingleArmState state                     # 机械臂本体数据
+std_msgs/UInt8MultiArray rgb_data        # RGB 图像数据， (height x width x 3)
+std_msgs/Bool            reset           # 重置信号：True 表示请求系统重置或回到初始状态
 
 ---
 # 输出: 机器人关节角度（numpy 数组）

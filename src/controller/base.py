@@ -2,7 +2,7 @@ import numpy as np
 from std_msgs.msg import Float64MultiArray, UInt8MultiArray,Float64, MultiArrayLayout, MultiArrayDimension
 import rospy
 from act_dp_service.srv import get_action
-from act_dp_service.msg import RawData
+from act_dp_service.msg import SingleArmState
 import os
 from isaacsim.robot_motion.motion_generation import ArticulationKinematicsSolver,LulaKinematicsSolver
 from isaacsim.core.prims import SingleArticulation as Articulation
@@ -38,7 +38,23 @@ class ROSServiceController(BaseController):
         super().__init__()
         self.ros_service_name = ros_service_name
 
-    def process_obs(self,observation):
+    def process_rgb_data(self,rgb_data):
+        # 处理 rgb data
+        rgb_np = rgb_data
+        height, width, channels = rgb_np.shape
+        layout = MultiArrayLayout(
+            dim=[
+                MultiArrayDimension(label="height", size=height, stride=width * channels),
+                MultiArrayDimension(label="width", size=width, stride=channels),
+                MultiArrayDimension(label="channel", size=channels, stride=1),
+            ],
+            data_offset=0
+        )
+        rgb_msg = UInt8MultiArray(layout=layout, data=rgb_np.flatten().tolist())
+        return rgb_msg
+
+    def process_proprioception(self,observation):
+        # 处理机器人的本体数据
         init_ee_pose = observation['init_ee_pose']
         init_ee_pose = Float64MultiArray(
             data = list (
@@ -64,37 +80,24 @@ class ROSServiceController(BaseController):
         )
 
         gripper_width = Float64(data=observation['gripper_width'])
+       
 
-        reset = Float64(data=observation['reset'])
-
-        rgb_np = observation['rgb_data']
-        height, width, channels = rgb_np.shape
-        layout = MultiArrayLayout(
-            dim=[
-                MultiArrayDimension(label="height", size=height, stride=width * channels),
-                MultiArrayDimension(label="width", size=width, stride=channels),
-                MultiArrayDimension(label="channel", size=channels, stride=1),
-            ],
-            data_offset=0
-        )
-        rgb_msg = UInt8MultiArray(layout=layout, data=rgb_np.flatten().tolist())
-
-        raw_data = RawData(
+        arm_state = SingleArmState(
             ee_pose,
             joint_pos,
             init_ee_pose,
             init_joint_pos,
             gripper_width,
-            rgb_msg,
-            reset
         )
-        return raw_data
+        return arm_state
     
     def forward(self,observation):
-        raw_data = self.process_obs(observation)
+        rgb_data = self.process_rgb_data(observation['rgb_data'])
+        arm_state = self.process_proprioception(observation)
+        reset = Float64(data=observation['reset'])
         rospy.wait_for_service(self.ros_service_name)
         get_control_action = rospy.ServiceProxy(self.ros_service_name, get_action)
-        target_action = get_control_action(raw_data)
+        target_action = get_control_action(arm_state,rgb_data,reset)
         return np.array(target_action.actions.data)
     
 
@@ -132,10 +135,12 @@ class ROSIKController(ROSServiceController):
              self.articulation.initialize()
              self.is_initialized = True
 
-        raw_data = self.process_obs(observation)
+        rgb_data = self.process_rgb_data(observation['rgb_data'])
+        arm_state = self.process_proprioception(observation)
+        reset = Float64(data=observation['reset'])
         rospy.wait_for_service(self.ros_service_name)
         get_control_action = rospy.ServiceProxy(self.ros_service_name, get_action)
-        next_ee_pose = get_control_action(raw_data)
+        next_ee_pose = get_control_action(arm_state,rgb_data,reset)
         target_action = np.array(next_ee_pose.actions.data)
         gripper_width = target_action[-1]
 

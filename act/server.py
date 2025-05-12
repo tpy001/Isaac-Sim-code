@@ -60,14 +60,18 @@ def inference(raw_data):
     global t
     global all_actions
     
-    cur_joint_pos = np.array(raw_data.sensor.joint_pos.data).reshape(-1)
-    reset = bool(raw_data.sensor.reset.data)
+    arm_state = raw_data.state
+    rgb_data = raw_data.rgb_data
+    reset = raw_data.reset
+
+    cur_joint_pos = np.array(arm_state.joint_pos.data).reshape(-1)
+    reset = bool(reset.data)
 
     # 2. 解码图像
-    rgb_flat = np.frombuffer(bytes(raw_data.sensor.rgb_data.data), dtype=np.uint8)
-    height = raw_data.sensor.rgb_data.layout.dim[0].size
-    width = raw_data.sensor.rgb_data.layout.dim[1].size
-    channels = raw_data.sensor.rgb_data.layout.dim[2].size
+    rgb_flat = np.frombuffer(bytes(rgb_data.data), dtype=np.uint8)
+    height = rgb_data.layout.dim[0].size
+    width = rgb_data.layout.dim[1].size
+    channels = rgb_data.layout.dim[2].size
     rgb_img = rgb_flat.reshape((height, width, channels))
 
     policy.eval()

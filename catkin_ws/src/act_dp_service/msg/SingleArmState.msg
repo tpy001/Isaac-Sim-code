@@ -5,6 +5,3 @@ std_msgs/Float64MultiArray init_ee_pose    # 初始末端执行器 (End-Effector
 std_msgs/Float64MultiArray init_joint_pos    # 初始关节角度
 
 std_msgs/Float64 gripper_width           # 夹爪宽度
-std_msgs/UInt8MultiArray rgb_data        # RGB 图像数据， (height x width x 3)
-
-std_msgs/Bool            reset           # 重置信号：True 表示请求系统重置或回到初始状态

@@ -357,23 +357,27 @@ def main(raw_data):
     主函数，完成模型加载、推理和结果处理
     :param ckpt_path: 模型检查点文件路径
     """
+    arm_state = raw_data.state
+    rgb_data = raw_data.rgb_data
+    reset = raw_data.reset
+
     if len(action_buffer) != 0:
         target_action = action_buffer.popleft()
     else:
         # 输入是世界坐标系下的绝对 pose + 第 0 时刻的 pose +  RGB 图像
-        init_ee_pose = np.array(raw_data.sensor.init_ee_pose.data)  # wxyz 格式的四元数表示旋转
+        init_ee_pose = np.array(arm_state.init_ee_pose.data)  # wxyz 格式的四元数表示旋转
         rot_vec = quaternion_to_rotvec(init_ee_pose[3:7])
         init_ee_pose = np.concatenate([init_ee_pose[:3], rot_vec])  # shape: (6,)
 
-        cur_ee_pose = np.array(raw_data.sensor.ee_pose.data) # wxyz 格式的四元数表示旋转
-        gripper_width = raw_data.sensor.gripper_width.data
-        reset = bool(raw_data.sensor.reset.data)
+        cur_ee_pose = np.array(arm_state.ee_pose.data) # wxyz 格式的四元数表示旋转
+        gripper_width = arm_state.gripper_width.data
+        reset = bool(reset.data)
 
         # 2. 解码图像
-        rgb_flat = np.frombuffer(bytes(raw_data.sensor.rgb_data.data), dtype=np.uint8)
-        height = raw_data.sensor.rgb_data.layout.dim[0].size
-        width = raw_data.sensor.rgb_data.layout.dim[1].size
-        channels = raw_data.sensor.rgb_data.layout.dim[2].size
+        rgb_flat = np.frombuffer(bytes(rgb_data.data), dtype=np.uint8)
+        height = rgb_data.layout.dim[0].size
+        width = rgb_data.layout.dim[1].size
+        channels = rgb_data.layout.dim[2].size
         rgb_img = rgb_flat.reshape((height, width, channels))
 
         resized_img_array = np.array(resize_and_center_crop(Image.fromarray(rgb_img), target_size=img_size))

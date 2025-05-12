@@ -50,7 +50,8 @@ find_package(catkin REQUIRED COMPONENTS
 ## Generate messages in the 'msg' folder
 add_message_files(
    FILES
-   RawData.msg
+   SingleArmState.msg
+   DualArmState.msg
 #   Message2.msg
 )
 
@@ -58,6 +59,7 @@ add_message_files(
  add_service_files(
    FILES
    get_action.srv
+   get_action_bimanual.srv
 #   Service2.srv
  )
 
