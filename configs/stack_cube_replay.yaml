@@ -13,20 +13,20 @@ task:
     scenary:
         _target_: src.scenary.stack_cube.StackCubeScenary
         usd_file_path: "./assets/Franka_env_4.usd"
-        random: True
+        random: False
         src_cube_cfg: {
             name: cube_red,
-            position: [0.511521,0.154694,0.120000],
-            orientation: [0.966067,0.000000,0.000000,0.258293],
+            position: [ 0.521152,-0.141401, 0.120000],  
+            orientation: [ 0.967518,0.000000,0.000000,-0.252802],
             prim_path: /World/Cube,
             scale: [0.05, 0.05, 0.05],
             size: 1.0,
             color: [1, 0, 0]
         }
         target_cube_cfg: {
-            name: cube_blue,
-            position: [0.509482,-0.122161,0.120000],
-            orientation: [0.966067,0.000000,0.000000,0.258293],
+            name: cube_blue,   
+            position: [0.645974, -0.027349, 0.120000],
+            orientation: [0.967518,0.000000,0.000000,-0.252802],
             prim_path: /World/Cube2,
             scale: [0.05, 0.05, 0.05],
             size: 1.0,
@@ -46,11 +46,11 @@ task:
                 camera_prim_path: /World/franka/panda_hand/owl/camera
                 camera_freq: ${frequencies.camera} 
                 resolution: [640,480]
-        controller:
-            _target_: src.controller.ROS_controller.ROSController
-            ros_service_name: sensor_processing
   
     dataset:
         _target_: src.dataset.act_dataset.ACTDataset
         dataset_dir: ./datasets/stack_cube_act_sim
         episode_nums: 1
+
+    replay_horizon: -1
+    replay_trajectory_index: 0

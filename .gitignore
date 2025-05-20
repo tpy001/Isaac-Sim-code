@@ -2,7 +2,10 @@ outputs/
 *.pyc
 datasets/
 assets/
-data/
+data
 Diffusion_Policy
-data_collect/
 .vscode/
+./data_collect/
+catkin_ws/build/
+catkin_ws/devel
+umi/dataset

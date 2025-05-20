@@ -33,19 +33,22 @@ def process_episode(episode_folder, output_file):
     image_files = sorted(os.listdir(camera_folder), key=natural_sort_key)  # 使用自然排序
     images_data = []
     for image_file in image_files:
-        image_path = os.path.join(camera_folder, image_file)
-        image = Image.open(image_path)
-        image_array = np.array(image)  # 将图像转换为 NumPy 数组
-        images_data.append(image_array)
+        if "front" in image_file:
+            image_path = os.path.join(camera_folder, image_file)
+            image = Image.open(image_path)
+            image_array = np.array(image)  # 将图像转换为 NumPy 数组
+            images_data.append(image_array)
     images_data = np.array(images_data)
 
     # 读取 qpos 数据
     data_folder = os.path.join(episode_folder, "data")
-    qpos_file = os.path.join(data_folder, "robot0_joint_positions.txt")
+    qpos_file = os.path.join(data_folder, "joint_pos.txt")
+    ee_pose_file = os.path.join(data_folder, "ee_pose.txt")
     qpos_data = np.loadtxt(qpos_file)
+    ee_pose_data = np.loadtxt(ee_pose_file)
 
     try:
-        action_file = os.path.join(data_folder, "robot0_action_joint_positions.txt")
+        action_file = os.path.join(data_folder, "action_joint_pos.txt")
         action_data = np.loadtxt(action_file)
     except:
         print("Warning: no action data found in saved episode. Try use qpos_data as action data")
@@ -67,6 +70,7 @@ def process_episode(episode_folder, output_file):
         
         # 创建 qpos 数据集
         qpos_dataset = observations_group.create_dataset("qpos", data=qpos_data, compression="gzip")
+        ee_pose_dataset = observations_group.create_dataset("ee_pose", data=ee_pose_data, compression="gzip")
         
         # 创建 action 数据集（假设 action 是 qpos 的复制）
         action_dataset = hdf5_file.create_dataset("action", data=action_data, compression="gzip")
@@ -89,6 +93,6 @@ def process_all_episodes(base_folder, output_folder):
         process_episode(episode_folder, output_file)
 
 # 示例用法
-base_folder = "data_collect"  # 替换为你的根目录路径
+base_folder = "data_collect/"  # 替换为你的根目录路径
 output_folder = "dataset_test"  # 替换为你希望保存 HDF5 文件的目录
 process_all_episodes(base_folder, output_folder)

@@ -1,59 +1,60 @@
 # config.yaml
-scenary:
-  _target_: src.scenary.base.StackCubeScenary
-  # usd_file_path: "./assets/Franka_env_3.usd"
-  usd_file_path: "./assets/Franka_env_4.usd"
-  random: False
-  src_cube_cfg: {
-      name: cube_red,
-      position: [  0.560670,-0.105259,0.120000],
-      orientation: [0.998914,0.000000,0.000000,-0.046590],
-      prim_path: /World/Cube,
-      scale: [0.05, 0.05, 0.05],
-      size: 1.0,
-      color: [1, 0, 0]
-  }
-  target_cube_cfg: { 
-      name: cube_blue,
-      position: [0.600718,0.037329,0.120000],
-      orientation: [0.998914,0.000000,0.000000,-0.046590],
-      prim_path: /World/Cube2,
-      scale: [0.05, 0.05, 0.05],
-      size: 1.0,
-      color: [0, 0, 1]
-  }
-controller:
-  _target_: src.controller.base.ROSIKController
-  ros_service_name: sensor_processing
-  ik_end_effector_name: panda_ee
-  kinematics_config_dir: src/controller/franka_IK_config
-  robot_description_path: robot_descriptor.yaml
-  urdf_path: lula_franka_gen.urdf
-  
-sensor:
-  _target_: src.sensor.base.Camera
-  camera_prim_path: /World/franka/panda_hand/owl/camera
-  camera_freq: 20 
-  resolution: [640,480]
-
-robot:
-  _target_: src.robots.base.BaseRobot
-  robot_prim_path: /World/franka
-  joints_name: [
-     panda_joint1,panda_joint2,panda_joint3,panda_joint4,panda_joint5,panda_joint6,panda_joint7,panda_finger_joint1
-  ]
-  ee_prim_path: /World/franka/panda_hand/tool_center
-  gripper_joint_name: panda_finger_joint1
-
-dataset:
-  _target_: src.dataset.base.ACTDataset
-  dataset_dir: ./datasets/stack_cube_act_sim
-  episode_nums: 1
-
-task:
-  _target_: src.task.base.BaseTask
-  replay_horizon: 0  # -1 代表 replay 所有数据
-
-sensor_list: []    # 可以加入更多 sensor 配置  
+frequencies:
+  control: 20
+  camera: 20
+  sim: 60
 
 seed: 111
+
+task:
+    _target_: src.task.base.BaseTask
+    frequencies: ${frequencies}
+    scenary:
+        _target_: src.scenary.stack_cube.StackCubeScenary
+        # usd_file_path: "./assets/Franka_env_3.usd"
+        usd_file_path: "./assets/Franka_env_4.usd"
+        random: False
+        src_cube_cfg: {
+            name: cube_red,
+            position: [  0.560670,-0.105259,0.120000],
+            orientation: [0.998914,0.000000,0.000000,-0.046590],
+            prim_path: /World/Cube,
+            scale: [0.05, 0.05, 0.05],
+            size: 1.0,
+            color: [1, 0, 0]
+        }
+        target_cube_cfg: { 
+            name: cube_blue,
+            position: [0.600718,0.037329,0.120000],
+            orientation: [0.998914,0.000000,0.000000,-0.046590],
+            prim_path: /World/Cube2,
+            scale: [0.05, 0.05, 0.05],
+            size: 1.0,
+            color: [0, 0, 1]
+        }
+    robot:
+        _target_: src.robots.base.BaseRobot
+        robot_prim_path: /World/franka
+        joints_name: [
+          panda_joint1,panda_joint2,panda_joint3,panda_joint4,panda_joint5,panda_joint6,panda_joint7,panda_finger_joint1
+        ]
+        ee_prim_path: /World/franka/panda_hand/tool_center
+        gripper_joint_name: panda_finger_joint1
+        sensors:
+            camera_rgb_wrist:
+                _target_: src.sensor.camera.Camera
+                camera_prim_path: /World/franka/panda_hand/owl/camera
+                camera_freq: ${frequencies.camera} 
+                resolution: [640,480]
+        controller:
+            _target_: src.controller.ROS_controller_IK.ROSControllerIK
+            ros_service_name: sensor_processing
+            ik_end_effector_name: panda_ee
+            kinematics_config_dir: src/controller/franka_IK_config
+            robot_description_path: robot_descriptor.yaml
+            urdf_path: lula_franka_gen.urdf
+
+    dataset:
+        _target_: src.dataset.act_dataset.ACTDataset
+        dataset_dir: ./datasets/stack_cube_act_sim
+        episode_nums: 1
