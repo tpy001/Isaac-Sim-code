@@ -19,9 +19,8 @@ from policy import ACTPolicy, CNNMLPPolicy
 from visualize_episodes import save_videos
 
 import rospy
-from act_dp_service.srv import get_action, get_actionResponse
+from act_dp_service.srv import get_action_bimanual,get_action_bimanualResponse
 from std_msgs.msg import Float64MultiArray
-
 from aloha_scripts.constants import STATE_DIM
 
 exp_weight = 0.1
@@ -62,11 +61,18 @@ def inference(raw_data):
     global t
     global all_actions
     
-    arm_state = raw_data.state
-    rgb_data = raw_data.rgb_data
-    reset = raw_data.reset
+    left_arm_state = raw_data.states.left_arm
+    left_joint_pos = np.array(left_arm_state.joint_pos.data)
+    right_arm_state = raw_data.states.right_arm
+    right_joint_pos =  np.array(right_arm_state.joint_pos.data)
 
-    cur_joint_pos = np.array(arm_state.joint_pos.data).reshape(-1)
+    cur_joint_pos = np.concatenate( [  
+        left_joint_pos,
+        right_joint_pos,
+    ])
+
+    rgb_data = raw_data.font_camera
+    reset = raw_data.reset
     reset = bool(reset.data)
 
     # 2. 解码图像
@@ -135,7 +141,7 @@ def inference(raw_data):
 
         print(target_qpos)
         a = Float64MultiArray(data = target_qpos.tolist()) # 
-        return get_actionResponse(a)   
+        return get_action_bimanualResponse(a)   
 
    
 
@@ -280,5 +286,5 @@ target_qpos_list = []
 all_actions = []
 t = 0
 rospy.init_node('policy_network_node')  
-s = rospy.Service('sensor_processing', get_action, inference)
+s = rospy.Service('sensor_processing', get_action_bimanual, inference)
 rospy.spin()   # 就像订阅者示例一样，rospy.spin()使代码不会退出，直到服务关闭；

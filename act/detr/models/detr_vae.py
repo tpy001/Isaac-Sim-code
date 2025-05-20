@@ -9,6 +9,7 @@ from .backbone import build_backbone
 from .transformer import build_transformer, TransformerEncoder, TransformerEncoderLayer
 
 import numpy as np
+from aloha_scripts.constants import STATE_DIM
 
 import IPython
 e = IPython.embed
@@ -235,7 +236,7 @@ def build_encoder(args):
 
 def build(args):
     #修改成8适应Franka
-    state_dim = 8 # TODO hardcode
+    state_dim = STATE_DIM # TODO hardcode
 
     # From state
     # backbone = None # from state for now, no need for conv nets

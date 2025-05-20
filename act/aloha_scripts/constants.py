@@ -11,9 +11,11 @@ DATA_DIR = './dataset'
 # isaacsim中stack_cube任务配置
 TASK_CONFIGS = {
     'stake_cube_scripted':{
-        'dataset_dir': DATA_DIR + '/stack_cube_v3',
-        'num_episodes': 51,
-        'episode_len': 125,
+        'dataset_dir': DATA_DIR + '/transfer_cubev3',
+        'num_episodes': 52,
+        'episode_len': 180,
         'camera_names': ['front']
     },
 }
+
+STATE_DIM = 16

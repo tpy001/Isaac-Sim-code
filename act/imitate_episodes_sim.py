@@ -17,6 +17,7 @@ from policy import ACTPolicy, CNNMLPPolicy
 from visualize_episodes import save_videos
 
 from sim_env import BOX_POSE
+from aloha_scripts.constants import STATE_DIM
 
 import IPython
 e = IPython.embed
@@ -48,7 +49,6 @@ def main(args):
     camera_names = task_config['camera_names']
 
     # fixed parameters
-    state_dim = 8
     lr_backbone = 1e-5
     backbone = 'resnet18'
     if policy_class == 'ACT':
@@ -77,7 +77,7 @@ def main(args):
         'num_epochs': num_epochs,
         'ckpt_dir': ckpt_dir,
         'episode_len': episode_len,
-        'state_dim': state_dim,
+        'state_dim': STATE_DIM,
         'lr': args['lr'],
         'policy_class': policy_class,
         'onscreen_render': onscreen_render,
