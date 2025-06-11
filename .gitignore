@@ -10,6 +10,8 @@ wandb/
 Diffusion_Policy
 data_collect/
 .vscode/
+catkin_ws/build/
+catkin_ws/devel/
 
 .ckpt
 .pth
