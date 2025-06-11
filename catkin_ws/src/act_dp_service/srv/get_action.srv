@@ -1,0 +1,6 @@
+# 输入: 传感器数据
+RawData sensor
+
+---
+# 输出: 机器人关节角度（numpy 数组）
+std_msgs/Float64MultiArray actions

@@ -1,0 +1,2 @@
+- setup-file:
+    local-name: /home/pinkman/projects/dp_depth/catkin_ws/devel/setup.sh

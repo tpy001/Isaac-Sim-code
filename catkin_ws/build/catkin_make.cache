@@ -1,0 +1,2 @@
+act_dp_service
+-DPYTHON_EXECUTABLE=/home/pinkman/isaacsim/kit/python/bin/python3 -DCATKIN_WHITELIST_PACKAGES=act_dp_service -DCATKIN_DEVEL_PREFIX=/home/pinkman/projects/dp_depth/catkin_ws/devel -DCMAKE_INSTALL_PREFIX=/home/pinkman/projects/dp_depth/catkin_ws/install -G Unix Makefiles

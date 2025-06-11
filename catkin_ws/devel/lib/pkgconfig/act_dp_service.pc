@@ -1,0 +1,8 @@
+prefix=/home/pinkman/projects/dp_depth/catkin_ws/devel
+
+Name: act_dp_service
+Description: Description of act_dp_service
+Version: 0.0.0
+Cflags: -I/home/pinkman/projects/dp_depth/catkin_ws/devel/include
+Libs: -L${prefix}/lib 
+Requires: rospy std_msgs message_runtime geometry_msgs
