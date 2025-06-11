@@ -1,0 +1,5 @@
+*.pyc
+data/
+ckpt/
+example_demo_session
+wandb/

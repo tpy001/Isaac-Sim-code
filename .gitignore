@@ -1,0 +1,16 @@
+outputs/
+*.pyc
+datasets/
+assets/
+data/
+data_collect/
+outputs/
+mutli_task_results/
+wandb/
+Diffusion_Policy
+data_collect/
+.vscode/
+
+.ckpt
+.pth
+.pt
