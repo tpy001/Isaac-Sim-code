@@ -23,7 +23,18 @@ cd umi
     INPUT_SIZE="480"  # 输入图像尺寸
     PRED_ONLY=true 
     GRAYSCALE=false  # 是否灰度化
-采集得到的数据位于 data_collect/目录下
+```
+采集得到的数据位于 data_collect/ep0_xxx/depth_maps/ 目录下;
+
+在得到深度图之前，你需要先下载深度渲染算法的权重以及之后推理用到的dp模型权重:
+
+| 文件名 | 下载地址 | 存放路径 | 说明 | 
+| ----|  ----|   ----| ----| 
+| depth_anything_v2_vits.pth | [下载链接]() | umi/ckpt/ | 较小参数量的模型权重|
+| depth_anything_v2_vitb.pth | [下载链接](https://drive.usercontent.google.com/download?id=19iq23YNKJyqH0QQpBtrWrAGDbQPTnhpP&export=download&authuser=0&confirm=t&uuid=78d5d1ff-1d75-43b7-8a7b-5088339c33e9&at=AN8xHoqNCYLQKDmNaCrsE_I5XTxy:1750074426888) | umi/ckpt/ | 中等参数量的模型权重 |
+| depth_anything_v2_vitl.pth | [下载链接](https://drive.usercontent.google.com/download?id=1kWv2Gs9bHmLU9p1oIKseEzatSuYMYMUz&export=download&authuser=0&confirm=t&uuid=89776719-968c-4280-a076-98ce331a905e&at=AN8xHorPFA0istfeSh2u8KNYsE6O:1750074479684) | umi/ckpt/ | 较大参数量的模型权重，通常意义上较大的参数量渲染效果更好，但具体的模型选择也取决于你的算力
+| latest.ckpt/ | [下载链接](https://drive.usercontent.google.com/download?id=1xZNJ5pPyTqQu1hmmh9RcEE4usbBWvE7x&export=download&authuser=0&confirm=t&uuid=e1eb9133-8d94-4d52-bf05-5f6ecc95448e&at=AN8xHopFvgNqsViMmfaDR-_FjuZ-:1750074354360) | umi/ckpt | 纳入深度信息的dp模型权重 
+
 
 #### 4. 运行数据转化的代码
 ```
