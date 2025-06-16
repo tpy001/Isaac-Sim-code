@@ -9,7 +9,23 @@
 ./run.sh stack_cube_data_collect
 ```
 采集得到的数据位于 data_collect/目录下
-#### 3. 运行数据转化的代码
+
+#### 3. 运行渲染深度图的代码
+```
+cd umi
+./render.sh
+```
+需要修改这些参数:
+```
+    BASE_DATA_DIR="/home/pinkman/projects/dp_depth/data_collect"  # 数据根目录
+    OUTPUT_BASE_DIR="/home/pinkman/projects/dp_depth/data_collect"  # 输出根目录
+    ENCODER="vitl"  # 编码器类型
+    INPUT_SIZE="480"  # 输入图像尺寸
+    PRED_ONLY=true 
+    GRAYSCALE=false  # 是否灰度化
+采集得到的数据位于 data_collect/目录下
+
+#### 4. 运行数据转化的代码
 ```
     conda activate umi
     python to_umi_format.py
@@ -20,13 +36,13 @@
     output_zarr = "./train_data.zarr.zip"
     epoch_nums = 51
 ```
-#### 4. 运行模型训练的代码
+#### 5. 运行模型训练的代码
 ```
     conda activate umi
     cd umi
     ./train.sh
 ```
-#### 5. 运行推理的代码
+#### 6. 运行推理的代码
 (1) 启动 isaac sim 客户端
 ```
     ./run.sh stack_cube_dp_v3_depth
