@@ -63,3 +63,14 @@ cd umi
     conda activate umi
     ./test.sh
 ```
+
+#### 7. 运行自动化测试的代码，注意目前不支持并行测试
+```
+./mutli_task.sh
+```
+你需要对以下参数修改来适配你的实验需求：
+```
+NUM_TRIALS=100 # 实验次数
+OUTPUT_BASE="./mutli_task_results" # 日志输出目录，你还可以选择是否保存实验中机械臂的轨迹来进行可视化回放的验证，但目前不支持录制回放功能
+CONFIG_YAML="./configs/stack_cube_dp_v3_depth_mutli_task.yaml" # 实验配置文件
+```
