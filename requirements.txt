@@ -6,3 +6,7 @@ h5py==3.13.0
 pyparsing==2.4.6
 pyyaml==5.3.1
 empy==3.3.2
+gradio_imageslider
+gradio==4.29.0
+matplotlib
+opencv-python
