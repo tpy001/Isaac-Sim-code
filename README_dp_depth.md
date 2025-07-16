@@ -1,6 +1,5 @@
 ## Isaac Sim + DP 深度
-环境安装：获取源代码，然后下载 dp+depth 的模型权重，放在 umi/ckpt 目录下，名字为 latest.ckpt
-切换分支到dp_depth: 
+环境安装：获取源代码，然后下载 dp+depth 的模型权重，放在 umi/ckpt 目录下，名字为 latest.ckpt，并切换分支到dp_depth: 
 ```
 git checkout dp_depth
 ```
